@@ -6,6 +6,7 @@
     <title>Reports - Security Head</title>
     <link rel="stylesheet" href="/css/incident-report.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/security-head.js" defer></script>
     <style>
         .tabs {
@@ -185,6 +186,17 @@
                         <td><input type="text" id="type-of-operation" name="type-of-operation" value="<%= incident.operationType %>" required></td>
                     </tr>
                 </table>
+            </fieldset>
+            <fieldset>
+                <legend>UID Number</legend>
+        
+                <select name="uid-number" id="uid-number" required>
+                    <option value="" selected>Select UID Number</option>
+                    <option value="Incident1">Incident1</option>
+                    <option value="Incident2">Incident2</option>
+                    <option value="Incident3">Incident3</option>
+                    <option value="Other">Other</option>
+                </select><br><br>
             </fieldset>
             <fieldset>
                 <legend>Details of Aircraft Involved, if applicable</legend>
@@ -386,6 +398,31 @@
                 <legend>4. Safety Recommendations</legend>
                 <textarea id="safety-recommendations" name="safety-recommendations" rows="5" cols="50" required><%= safetyRecommendations %></textarea>
             </fieldset>
+            <label for="date">Date:</label>
+                <input type="date" id="date" name="date">
+            </fieldset>
+            <fieldset>
+                <legend>5. Appendices</legend>
+                <textarea id="appendices" name="appendices" rows="5" cols="50" required></textarea>
+            </fieldset>
+            <fieldset>
+  <legend>6. Department to notify</legend>
+  <select name="dpt-name" id="dpt-name" required>
+      <option value="" selected>Select an Department</option>
+      <option value="Incident1"></option>
+      <option value="Incident2"></option>
+      <option value="Incident3"></option>
+      <option value="Other">Other</option>
+  </select><br><br>
+</fieldset>
+      <input type="hidden" id="hidden-input" name="departments">
+
+            <!-- Add these hidden fields inside your form before the submit button -->
+<input type="hidden" id="vehicles_json" name="vehicles_json" value="[]">
+<input type="hidden" id="incidents_json" name="incidents_json" value="[]">
+<input type="hidden" name="airline-operator" id="airline-operator">
+<input type="hidden" name="phase-of-operation-aircraft" id="phase-of-operation-aircraft-hidden">
+            <button type="submit" id="submit">Submit</button>
                 <input type="submit" value="Submit">
         </form>
             </div>
@@ -445,6 +482,82 @@
             var row = button.parentNode.parentNode;
             row.parentNode.removeChild(row);
         }
+    //load uid number
+function loadUidNumbers() {
+    $.ajax({
+        url: "http://localhost:3000/uid_numbers",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            let dropdown = $("#uid-number");
+            dropdown.empty(); // Clear existing options
+            dropdown.append('<option value="">Select UID Number</option>');
+
+            $.each(data, function(index, name) {
+                dropdown.append(`<option value="${name}">${name}</option>`);
+            });
+        },
+        error: function() {
+            alert("Failed to load UID Numbers.");
+        }
+    });
+}
+
+$(document).ready(function() {
+    loadUidNumbers();
+
+    // Ensure the form properly detects the selected value before submission
+    $("form").on("submit", function(e) {
+        let selectedValue = $("#uid-number").val();
+        console.log("Selected UID Number:", selectedValue); // Debugging
+
+        if (!selectedValue) {
+            alert("Please select an UID Number  from the list.");
+            e.preventDefault(); // Stop form submission
+        }
+    });
+});
+
+// Refresh dropdown every 5 seconds to get newly added incidents
+// setInterval(loadIncidentTypes, 5000);
+
+
+
+//load department names
+function loadDepartmentNames() {
+    $.ajax({
+        url: "http://localhost:3000/department_names",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            let dropdown = $("#dpt-name");
+            dropdown.empty(); // Clear existing options
+            dropdown.append('<option value="">Select Department</option>');
+
+            $.each(data, function(index, name) {
+                dropdown.append(`<option value="${name}">${name}</option>`);
+            });
+        },
+        error: function() {
+            alert("Failed to load Department Names.");
+        }
+    });
+}
+
+$(document).ready(function() {
+    loadDepartmentNames();
+
+    // Ensure the form properly detects the selected value before submission
+    $("form").on("submit", function(e) {
+        let selectedValue = $("#dpt-name").val();
+        console.log("Selected Department:", selectedValue); // Debugging
+
+        if (!selectedValue) {
+            alert("Please select an Department  from the list.");
+            e.preventDefault(); // Stop form submission
+        }
+    });
+});
     </script>
 </body>
 </html>
